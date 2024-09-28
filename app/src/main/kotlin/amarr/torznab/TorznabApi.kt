@@ -53,10 +53,15 @@ private suspend fun ApplicationCall.handleRequests(indexer: Indexer) {
 
 private suspend fun ApplicationCall.performSearch(indexer: Indexer, xmlFormat: XML) {
     val query = request.queryParameters["q"].orEmpty()
+    val season = request.queryParameters["season"].orEmpty()
+    val episode = request.queryParameters["episode"].orEmpty().padStart(2, '0')
+
+    val finalQuery = "$query ${season}x$episode"
+    
     val offset = request.queryParameters["offset"]?.toIntOrNull() ?: 0
     val limit = request.queryParameters["limit"]?.toIntOrNull() ?: 100
     val cat = request.queryParameters["cat"]?.split(",")?.map { cat -> cat.toInt() } ?: emptyList()
-    application.log.debug("Handling search request: {}, {}, {}, {}", query, offset, limit, cat)
+    application.log.debug("Handling search request: {}, {}, {}, {}", finalQuery, offset, limit, cat)
     try {
         respondText(
             xmlFormat.encodeToString(indexer.search(query, offset, limit, cat)),

@@ -36,6 +36,7 @@ private suspend fun ApplicationCall.handleRequests(indexer: Indexer) {
         xmlDeclMode = XmlDeclMode.Charset
         xmlVersion = XmlVersion.XML10
     } // This API uses XML instead of JSON
+
     request.queryParameters["t"]?.let {
         when (it) {
             "caps" -> {
@@ -43,23 +44,36 @@ private suspend fun ApplicationCall.handleRequests(indexer: Indexer) {
                 respondText(xmlFormat.encodeToString(indexer.capabilities()), contentType = ContentType.Application.Xml)
             }
 
-            "tvsearch" -> performSearch(indexer, xmlFormat)
-            "search" -> performSearch(indexer, xmlFormat)
+            "tvsearch" -> performSearch(indexer, xmlFormat, isTvSearch = true)
+
+            "movie" -> performSearch(indexer, xmlFormat, isTvSearch = false)
 
             else -> throw IllegalArgumentException("Unknown action: $it")
         }
     } ?: throw IllegalArgumentException("Missing action")
 }
 
-private suspend fun ApplicationCall.performSearch(indexer: Indexer, xmlFormat: XML) {
+private suspend fun ApplicationCall.performSearch(indexer: Indexer, xmlFormat: XML, isTvSearch: Boolean) {
     val query = request.queryParameters["q"].orEmpty()
+    val finalQuery = if (isTvSearch) {
+        // Handle season and episode
+        val season = request.queryParameters["season"].orEmpty()
+        val episode = request.queryParameters["episode"].orEmpty().padStart(2, '0')
+        "$query ${season}x$episode"
+    } else {
+        // Only use the query for movies
+        query
+    }
+
     val offset = request.queryParameters["offset"]?.toIntOrNull() ?: 0
     val limit = request.queryParameters["limit"]?.toIntOrNull() ?: 100
     val cat = request.queryParameters["cat"]?.split(",")?.map { cat -> cat.toInt() } ?: emptyList()
-    application.log.debug("Handling search request: {}, {}, {}, {}", query, offset, limit, cat)
+
+    application.log.debug("Handling search request: {}, {}, {}, {}", finalQuery, offset, limit, cat)
+
     try {
         respondText(
-            xmlFormat.encodeToString(indexer.search(query, offset, limit, cat)),
+            xmlFormat.encodeToString(indexer.search(finalQuery, offset, limit, cat)),
             contentType = ContentType.Application.Xml
         )
     } catch (e: ThrottledException) {

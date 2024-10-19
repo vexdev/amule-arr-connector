@@ -14,7 +14,7 @@ dependencyResolutionManagement {
             version("ktor", "2.3.7")
             version("kotlin", "1.9.21")
             version("bt", "1.10")
-            version("kotest", "5.8.0")
+            version("kotest", "5.9.1")
 
             // Libraries
             library("ktor-server-core", "io.ktor", "ktor-server-core").versionRef("ktor")

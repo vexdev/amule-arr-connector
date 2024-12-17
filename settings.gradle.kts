@@ -31,7 +31,7 @@ dependencyResolutionManagement {
             library("ktor-client-logging", "io.ktor", "ktor-client-logging").versionRef("ktor")
             library("ktor-client-mock", "io.ktor", "ktor-client-mock").versionRef("ktor")
             library("jamule", "com.vexdev", "jamule").version("1.0.3")
-            library("guava", "com.google.guava", "guava").version("32.1.3-jre")
+            library("guava", "com.google.guava", "guava").version("33.4.0-jre")
             library("kotest-runner-junit5", "io.kotest", "kotest-runner-junit5").versionRef("kotest")
             library("kotest-assertions-core", "io.kotest", "kotest-assertions-core").versionRef("kotest")
             library("kotest-property", "io.kotest", "kotest-property").versionRef("kotest")
